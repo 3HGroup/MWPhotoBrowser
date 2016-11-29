@@ -40,14 +40,14 @@
 		_tapView = [[MWTapDetectingView alloc] initWithFrame:self.bounds];
 		_tapView.tapDelegate = self;
 		_tapView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-		_tapView.backgroundColor = [UIColor blackColor];
+        _tapView.backgroundColor = browser.useWhiteBackgroundColor ? [UIColor colorWithRed:0.8 green:0.8 blue:0.8 alpha:1.0] : [UIColor blackColor];
 		[self addSubview:_tapView];
 		
 		// Image view
 		_photoImageView = [[MWTapDetectingImageView alloc] initWithFrame:CGRectZero];
 		_photoImageView.tapDelegate = self;
 		_photoImageView.contentMode = UIViewContentModeCenter;
-		_photoImageView.backgroundColor = [UIColor blackColor];
+		_photoImageView.backgroundColor = browser.useWhiteBackgroundColor ? [UIColor lightGrayColor] : [UIColor blackColor];
 		[self addSubview:_photoImageView];
 		
 		// Loading indicator
@@ -66,7 +66,7 @@
                                                    object:nil];
         
 		// Setup
-		self.backgroundColor = [UIColor blackColor];
+		self.backgroundColor = browser.useWhiteBackgroundColor ? [UIColor colorWithRed:0.8 green:0.8 blue:0.8 alpha:1.0] : [UIColor blackColor];
 		self.delegate = self;
 		self.showsHorizontalScrollIndicator = NO;
 		self.showsVerticalScrollIndicator = NO;
@@ -88,6 +88,7 @@
     [self hideImageFailure];
     self.photo = nil;
     self.captionView = nil;
+    self.additionalView = nil;
     self.selectedButton = nil;
     self.playButton = nil;
     _photoImageView.hidden = NO;

@@ -1,4 +1,4 @@
-//
+ //
 //  MWPhotoBrowser.m
 //  MWPhotoBrowser
 //
@@ -83,6 +83,8 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     _didSavePreviousStateOfNavBar = NO;
     self.automaticallyAdjustsScrollViewInsets = NO;
     
+    _useWhiteBackgroundColor = NO;
+    
     // Listen for MWPhoto notifications
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(handleMWPhotoLoadingDidEndNotification:)
@@ -136,16 +138,18 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
     
+    // Added by Marko
+    // White theme for photo browser
+    // View
+    self.view.backgroundColor = [UIColor colorWithWhite:(_useWhiteBackgroundColor ? 1 : 0) alpha:1];
+    self.view.clipsToBounds = YES;
+    
     // Validate grid settings
     if (_startOnGrid) _enableGrid = YES;
     if (_enableGrid) {
         _enableGrid = [_delegate respondsToSelector:@selector(photoBrowser:thumbPhotoAtIndex:)];
     }
     if (!_enableGrid) _startOnGrid = NO;
-	
-	// View
-	self.view.backgroundColor = [UIColor blackColor];
-    self.view.clipsToBounds = YES;
 	
 	// Setup paging scrolling view
 	CGRect pagingScrollViewFrame = [self frameForPagingScrollView];
@@ -155,20 +159,23 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 	_pagingScrollView.delegate = self;
 	_pagingScrollView.showsHorizontalScrollIndicator = NO;
 	_pagingScrollView.showsVerticalScrollIndicator = NO;
-	_pagingScrollView.backgroundColor = [UIColor blackColor];
+    _pagingScrollView.backgroundColor = _useWhiteBackgroundColor ? [UIColor colorWithRed:0.8 green:0.8 blue:0.8 alpha:1.0] : [UIColor blackColor];
     _pagingScrollView.contentSize = [self contentSizeForPagingScrollView];
 	[self.view addSubview:_pagingScrollView];
 	
     // Toolbar
     _toolbar = [[UIToolbar alloc] initWithFrame:[self frameForToolbarAtOrientation:self.interfaceOrientation]];
-    _toolbar.tintColor = [UIColor whiteColor];
+    _toolbar.tintColor = _useWhiteBackgroundColor ? [UIColor blackColor] : [UIColor whiteColor];
     _toolbar.barTintColor = nil;
     [_toolbar setBackgroundImage:nil forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsDefault];
     [_toolbar setBackgroundImage:nil forToolbarPosition:UIToolbarPositionAny barMetrics:UIBarMetricsLandscapePhone];
-    _toolbar.barStyle = UIBarStyleBlackTranslucent;
+    _toolbar.barStyle = _useWhiteBackgroundColor ? UIBarStyleDefault : UIBarStyleBlack;
     _toolbar.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
     
     // Toolbar Items
+    if (self.displayCustomLabel) {
+        _customLabelButton = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
+    }
     if (self.displayNavArrows) {
         NSString *arrowPathFormat = @"MWPhotoBrowser.bundle/UIBarButtonItemArrow%@";
         UIImage *previousButtonImage = [UIImage imageForResourcePath:[NSString stringWithFormat:arrowPathFormat, @"Left"] ofType:@"png" inBundle:[NSBundle bundleForClass:[self class]]];
@@ -177,7 +184,13 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
         _nextButton = [[UIBarButtonItem alloc] initWithImage:nextButtonImage style:UIBarButtonItemStylePlain target:self action:@selector(gotoNextPage)];
     }
     if (self.displayActionButton) {
-        _actionButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(actionButtonPressed:)];
+        if( _customActionButtonImage != nil ) {
+            UIImage* image = [[UIImage imageNamed:_customActionButtonImage] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+            _actionButton = [[UIBarButtonItem alloc] initWithImage:image style:UIBarButtonItemStylePlain target:self action:@selector(actionButtonPressed:)];
+        }
+        else {
+            _actionButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAction target:self action:@selector(actionButtonPressed:)];
+        }
     }
     
     // Update
@@ -259,17 +272,29 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     } else {
         [items addObject:flexSpace];
     }
-
-    // Right - Action
-    if (_actionButton && !(!hasItems && !self.navigationItem.rightBarButtonItem)) {
+    
+    // Middle - Action
+    if (_actionButton) {
+        hasItems = YES;
         [items addObject:_actionButton];
-    } else {
-        // We're not showing the toolbar so try and show in top right
-        if (_actionButton)
-            self.navigationItem.rightBarButtonItem = _actionButton;
-        [items addObject:fixedSpace];
+        [items addObject:flexSpace];
     }
-
+//    if (_actionButton && !(!hasItems && !self.navigationItem.rightBarButtonItem)) {
+//        [items addObject:_actionButton];
+//        [items addObject:flexSpace];
+//    } else {
+//        // We're not showing the toolbar so try and show in top right
+//        if (_actionButton)
+//            self.navigationItem.rightBarButtonItem = _actionButton;
+//        [items addObject:fixedSpace];
+//    }
+    
+    // Right Custom Label
+    if (_customLabelButton) {
+        hasItems = YES;
+        [items addObject:_customLabelButton];
+    }
+    
     // Toolbar visibility
     [_toolbar setItems:items];
     BOOL hideToolbar = YES;
@@ -304,6 +329,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     _toolbar = nil;
     _previousButton = nil;
     _nextButton = nil;
+    _customLabelButton = nil;
     _progressHUD = nil;
     [super viewDidUnload];
 }
@@ -441,12 +467,16 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 
 - (void)setNavBarAppearance:(BOOL)animated {
     [self.navigationController setNavigationBarHidden:NO animated:animated];
+    
     UINavigationBar *navBar = self.navigationController.navigationBar;
-    navBar.tintColor = [UIColor whiteColor];
-    navBar.barTintColor = nil;
-    navBar.shadowImage = nil;
-    navBar.translucent = YES;
-    navBar.barStyle = UIBarStyleBlackTranslucent;
+    if (_useWhiteBackgroundColor == NO) {
+        navBar.tintColor = [UIColor whiteColor];
+        navBar.barTintColor = nil;
+        navBar.shadowImage = nil;
+        navBar.translucent = YES;
+    }
+    navBar.barStyle = _useWhiteBackgroundColor ? UIBarStyleDefault : UIBarStyleBlack;
+    
     [navBar setBackgroundImage:nil forBarMetrics:UIBarMetricsDefault];
     [navBar setBackgroundImage:nil forBarMetrics:UIBarMetricsLandscapePhone];
 }
@@ -517,6 +547,10 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 		page.frame = [self frameForPageAtIndex:index];
         if (page.captionView) {
             page.captionView.frame = [self frameForCaptionView:page.captionView atIndex:index];
+        }
+        if (page.additionalView) {
+            CGFloat height = page.captionView ? [page.captionView frame].size.height : 0;
+            page.additionalView.frame = [self frameForAdditionalView:page.additionalView bottomHeight:height atIndex:index];
         }
         if (page.selectedButton) {
             page.selectedButton.frame = [self frameForSelectedButton:page.selectedButton atIndex:index];
@@ -683,11 +717,20 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     } else {
         id <MWPhoto> photo = [self photoAtIndex:index];
         if ([photo respondsToSelector:@selector(caption)]) {
-            if ([photo caption]) captionView = [[MWCaptionView alloc] initWithPhoto:photo];
+            if ([photo caption]) captionView = [[MWCaptionView alloc] initWithPhoto:photo whiteBackground:_useWhiteBackgroundColor];
         }
     }
     captionView.alpha = [self areControlsHidden] ? 0 : 1; // Initial alpha
     return captionView;
+}
+
+- (UIImageView *)additionalViewForPhotoAtIndex:(NSUInteger)index {
+    UIView* imageView = nil;
+    if([_delegate respondsToSelector:@selector(photoBrowser:additionalViewForPhotoAtIndex:)]) {
+        imageView = [_delegate photoBrowser:self additionalViewForPhotoAtIndex:index];
+    }
+    
+    return imageView;
 }
 
 - (BOOL)photoIsSelectedAtIndex:(NSUInteger)index {
@@ -788,6 +831,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 		if (pageIndex < (NSUInteger)iFirstIndex || pageIndex > (NSUInteger)iLastIndex) {
 			[_recycledPages addObject:page];
             [page.captionView removeFromSuperview];
+            [page.additionalView removeFromSuperview];
             [page.selectedButton removeFromSuperview];
             [page.playButton removeFromSuperview];
             [page prepareForReuse];
@@ -820,6 +864,22 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
                 captionView.frame = [self frameForCaptionView:captionView atIndex:index];
                 [_pagingScrollView addSubview:captionView];
                 page.captionView = captionView;
+            }
+            
+            // Add some additional view
+            UIView *additionalView = [self additionalViewForPhotoAtIndex:index];
+            if (additionalView) {
+                CGFloat bottomHeight = captionView ? [captionView frame].size.height : 0;
+                additionalView.frame = [self frameForAdditionalView:additionalView bottomHeight:bottomHeight atIndex:index];
+                [_pagingScrollView addSubview:additionalView];
+                page.additionalView = additionalView;
+                
+                if ( [self areControlsHidden] == YES ) {
+                    page.additionalView.alpha = 0;
+                }
+                else {
+                    page.additionalView.alpha = 1;
+                }
             }
             
             // Add play button if needed
@@ -1019,6 +1079,16 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     return CGRectIntegral(captionFrame);
 }
 
+- (CGRect)frameForAdditionalView:(UIView *)additionalView bottomHeight: (CGFloat)bottomHeight atIndex:(NSUInteger)index {
+    CGRect pageFrame = [self frameForPageAtIndex:index];
+    CGSize viewSize = [additionalView bounds].size;
+    CGRect viewFrame = CGRectMake(pageFrame.origin.x,
+                                     pageFrame.size.height - viewSize.height - (_toolbar.superview?_toolbar.frame.size.height:0) - bottomHeight,
+                                     pageFrame.size.width,
+                                     viewSize.height);
+    return CGRectIntegral(viewFrame);
+}
+
 - (CGRect)frameForSelectedButton:(UIButton *)selectedButton atIndex:(NSUInteger)index {
     CGRect pageFrame = [self frameForPageAtIndex:index];
     CGFloat padding = 20;
@@ -1109,7 +1179,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     
     // Disable action button if there is no image or it's a video
     MWPhoto *photo = [self photoAtIndex:_currentPageIndex];
-    if ([photo underlyingImage] == nil || ([photo respondsToSelector:@selector(isVideo)] && photo.isVideo)) {
+    if ([photo underlyingImage] == nil || ([photo respondsToSelector:@selector(isVideo)] && photo.isVideo) || ([_delegate respondsToSelector:@selector(photoBrowser:enabledForActionButton:)] && [_delegate photoBrowser:self enabledForActionButton:_currentPageIndex] == NO )) {
         _actionButton.enabled = NO;
         _actionButton.tintColor = [UIColor clearColor]; // Tint to hide button
     } else {
@@ -1117,6 +1187,10 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
         _actionButton.tintColor = nil;
     }
 	
+    // Update Custom Label
+    if( _customLabelButton && [_delegate respondsToSelector:@selector(photoBrowser:titleForCustomLabel:)] ) {
+        _customLabelButton.title = [_delegate photoBrowser:self titleForCustomLabel:_currentPageIndex];
+    }
 }
 
 - (void)jumpToPageAtIndex:(NSUInteger)index animated:(BOOL)animated {
@@ -1187,6 +1261,23 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
         }
     }
     return index;
+}
+
+#pragma mark - Custom Action added by Marko
+- (void) setCustomActionButtonImage:(NSString *)customActionButtonImage {
+    
+    if( _displayActionButton == YES ) {
+        
+        UIImage* image = [[UIImage imageNamed: customActionButtonImage] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+        if( _actionButton == nil ) {
+            _actionButton = [[UIBarButtonItem alloc] initWithImage:image style:UIBarButtonItemStylePlain target:self action:@selector(actionButtonPressed:)];
+        }
+        else {
+            _actionButton.image = image;
+        }
+        
+        _customActionButtonImage = customActionButtonImage;
+    }
 }
 
 #pragma mark - Video
@@ -1448,6 +1539,14 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
                 captionFrame.origin.x = v.frame.origin.x; // Reset X
                 v.frame = CGRectOffset(captionFrame, 0, animatonOffset);
             }
+            if (page.additionalView) {
+                UIView *v = page.additionalView;
+                CGFloat height = page.captionView ? [page.captionView frame].size.height : 0;
+                // Pass any index, all we're interested in is the Y
+                CGRect viewFrame = [self frameForAdditionalView:v bottomHeight:height atIndex:0];
+                viewFrame.origin.x = v.frame.origin.x; // Reset X
+                v.frame = CGRectOffset(viewFrame, 0, animatonOffset);
+            }
         }
         
     }
@@ -1472,6 +1571,16 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
                 captionFrame.origin.x = v.frame.origin.x; // Reset X
                 if (hidden) captionFrame = CGRectOffset(captionFrame, 0, animatonOffset);
                 v.frame = captionFrame;
+                v.alpha = alpha;
+            }
+            if (page.additionalView) {
+                UIView *v = page.additionalView;
+                CGFloat height = page.captionView ? [page.captionView frame].size.height : 0;
+                // Pass any index, all we're interested in is the Y
+                CGRect viewFrame = [self frameForAdditionalView:v bottomHeight:height atIndex:0];
+                viewFrame.origin.x = v.frame.origin.x; // Reset X
+                if (hidden) viewFrame = CGRectOffset(viewFrame, 0, animatonOffset);
+                v.frame = viewFrame;
                 v.alpha = alpha;
             }
         }
@@ -1504,7 +1613,10 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle {
-    return UIStatusBarStyleLightContent;
+    // Added by Marko
+    // Adjust white theme background
+    return _useWhiteBackgroundColor ? UIStatusBarStyleDefault : UIStatusBarStyleLightContent;
+    // return UIStatusBarStyleLightContent;
 }
 
 - (UIStatusBarAnimation)preferredStatusBarUpdateAnimation {
