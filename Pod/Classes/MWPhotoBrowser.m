@@ -185,7 +185,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     }
     if (self.displayActionButton) {
         if( _customActionButtonImage != nil ) {
-            UIImage* image = [[UIImage imageNamed:_customActionButtonImage] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+            UIImage* image = [[UIImage imageNamed:_customActionButtonImage] imageWithRenderingMode:UIImageRenderingModeAutomatic];
             _actionButton = [[UIBarButtonItem alloc] initWithImage:image style:UIBarButtonItemStylePlain target:self action:@selector(actionButtonPressed:)];
         }
         else {
@@ -1268,7 +1268,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     
     if( _displayActionButton == YES ) {
         
-        UIImage* image = [[UIImage imageNamed: customActionButtonImage] imageWithRenderingMode:UIImageRenderingModeAlwaysOriginal];
+        UIImage* image = [[UIImage imageNamed: customActionButtonImage] imageWithRenderingMode:UIImageRenderingModeAutomatic];
         if( _actionButton == nil ) {
             _actionButton = [[UIBarButtonItem alloc] initWithImage:image style:UIBarButtonItemStylePlain target:self action:@selector(actionButtonPressed:)];
         }
