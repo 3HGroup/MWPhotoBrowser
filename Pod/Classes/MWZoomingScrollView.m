@@ -47,7 +47,7 @@
 		_photoImageView = [[MWTapDetectingImageView alloc] initWithFrame:CGRectZero];
 		_photoImageView.tapDelegate = self;
 		_photoImageView.contentMode = UIViewContentModeCenter;
-		_photoImageView.backgroundColor = browser.useWhiteBackgroundColor ? [UIColor lightGrayColor] : [UIColor blackColor];
+        _photoImageView.backgroundColor = [UIColor clearColor];
 		[self addSubview:_photoImageView];
 		
 		// Loading indicator
