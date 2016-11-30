@@ -175,6 +175,16 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     // Toolbar Items
     if (self.displayCustomLabel) {
         _customLabelButton = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
+        
+        // inherit navigation bar's font style
+        UIFont* navigationFont = [[self.navigationController.navigationBar titleTextAttributes] objectForKey:NSFontAttributeName];
+        UIColor* navigationColor = [[self.navigationController.navigationBar titleTextAttributes] objectForKey:NSForegroundColorAttributeName];
+        if (navigationFont != nil) {
+            [_customLabelButton setTitleTextAttributes:@{NSFontAttributeName: navigationFont} forState:UIControlStateNormal];
+        }
+        if (navigationColor != nil) {
+            [_customLabelButton setTitleTextAttributes:@{NSForegroundColorAttributeName: navigationColor} forState:UIControlStateNormal];
+        }
     }
     if (self.displayNavArrows) {
         NSString *arrowPathFormat = @"MWPhotoBrowser.bundle/UIBarButtonItemArrow%@";
