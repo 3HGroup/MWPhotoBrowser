@@ -220,15 +220,24 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     
     // Navigation buttons
     if ([self.navigationController.viewControllers objectAtIndex:0] == self) {
-        // We're first on stack so show done button
-        _doneButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Done", nil) style:UIBarButtonItemStylePlain target:self action:@selector(doneButtonPressed:)];
-        // Set appearance
-        [_doneButton setBackgroundImage:nil forState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
-        [_doneButton setBackgroundImage:nil forState:UIControlStateNormal barMetrics:UIBarMetricsLandscapePhone];
-        [_doneButton setBackgroundImage:nil forState:UIControlStateHighlighted barMetrics:UIBarMetricsDefault];
-        [_doneButton setBackgroundImage:nil forState:UIControlStateHighlighted barMetrics:UIBarMetricsLandscapePhone];
-        [_doneButton setTitleTextAttributes:[NSDictionary dictionary] forState:UIControlStateNormal];
-        [_doneButton setTitleTextAttributes:[NSDictionary dictionary] forState:UIControlStateHighlighted];
+        
+        // customize done button
+        if (self.customDoneButtonImage) {
+            // we are having image for done button
+            UIImage* image = [UIImage imageNamed:self.customDoneButtonImage];
+            _doneButton = [[UIBarButtonItem alloc] initWithImage:image style:UIBarButtonItemStylePlain target:self action:@selector(doneButtonPressed:)];
+        }
+        else {
+            // We're first on stack so show done button
+            _doneButton = [[UIBarButtonItem alloc] initWithTitle:NSLocalizedString(@"Done", nil) style:UIBarButtonItemStylePlain target:self action:@selector(doneButtonPressed:)];
+            // Set appearance
+            [_doneButton setBackgroundImage:nil forState:UIControlStateNormal barMetrics:UIBarMetricsDefault];
+            [_doneButton setBackgroundImage:nil forState:UIControlStateNormal barMetrics:UIBarMetricsLandscapePhone];
+            [_doneButton setBackgroundImage:nil forState:UIControlStateHighlighted barMetrics:UIBarMetricsDefault];
+            [_doneButton setBackgroundImage:nil forState:UIControlStateHighlighted barMetrics:UIBarMetricsLandscapePhone];
+            [_doneButton setTitleTextAttributes:[NSDictionary dictionary] forState:UIControlStateNormal];
+            [_doneButton setTitleTextAttributes:[NSDictionary dictionary] forState:UIControlStateHighlighted];
+        }
         self.navigationItem.rightBarButtonItem = _doneButton;
     } else {
         // We're not first so show back button
@@ -1170,7 +1179,12 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
             self.title = [NSString stringWithFormat:@"%lu %@ %lu", (unsigned long)(_currentPageIndex+1), NSLocalizedString(@"of", @"Used in the context: 'Showing 1 of 3 items'"), (unsigned long)numberOfPhotos];
         }
 	} else {
-		self.title = nil;
+        if ([_delegate respondsToSelector:@selector(photoBrowser:titleForPhotoAtIndex:)]) {
+            self.title = [_delegate photoBrowser:self titleForPhotoAtIndex:_currentPageIndex];
+        }
+        else {
+            self.title = nil;
+        }
 	}
 	
 	// Buttons
@@ -1278,6 +1292,16 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
         
         _customActionButtonImage = customActionButtonImage;
     }
+}
+
+- (void) setCustomDoneButtonImage:(NSString *)customDoneButtonImage {
+    
+    if( _doneButton != nil ) {
+        
+        UIImage* image = [UIImage imageNamed: customDoneButtonImage];
+        _doneButton = [[UIBarButtonItem alloc] initWithImage:image style:UIBarButtonItemStylePlain target:self action:@selector(doneButtonPressed:)];
+    }
+    _customDoneButtonImage = customDoneButtonImage;
 }
 
 #pragma mark - Video

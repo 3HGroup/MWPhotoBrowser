@@ -62,6 +62,7 @@
 @property (nonatomic, strong) NSString *customImageSelectedSmallIconName;
 
 @property (nonatomic, strong) NSString *customActionButtonImage;
+@property (nonatomic, strong) NSString *customDoneButtonImage;
 @property (nonatomic) BOOL displayCustomLabel;
 @property (nonatomic) BOOL useWhiteBackgroundColor;
 
