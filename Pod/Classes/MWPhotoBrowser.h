@@ -63,6 +63,7 @@
 
 @property (nonatomic, strong) NSString *customActionButtonImage;
 @property (nonatomic, strong) NSString *customDoneButtonImage;
+@property (nonatomic, strong) UIFont *customFont;
 @property (nonatomic) BOOL displayCustomLabel;
 @property (nonatomic) BOOL useWhiteBackgroundColor;
 

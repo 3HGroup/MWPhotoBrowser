@@ -177,13 +177,8 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
         _customLabelButton = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
         
         // inherit navigation bar's font style
-        UIFont* navigationFont = [[self.navigationController.navigationBar titleTextAttributes] objectForKey:NSFontAttributeName];
-        UIColor* navigationColor = [[self.navigationController.navigationBar titleTextAttributes] objectForKey:NSForegroundColorAttributeName];
-        if (navigationFont != nil) {
-            [_customLabelButton setTitleTextAttributes:@{NSFontAttributeName: navigationFont} forState:UIControlStateNormal];
-        }
-        if (navigationColor != nil) {
-            [_customLabelButton setTitleTextAttributes:@{NSForegroundColorAttributeName: navigationColor} forState:UIControlStateNormal];
+        if( self.customFont ) {
+            [_customLabelButton setTitleTextAttributes:@{NSFontAttributeName: self.customFont} forState:UIControlStateNormal];
         }
     }
     if (self.displayNavArrows) {
@@ -736,7 +731,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     } else {
         id <MWPhoto> photo = [self photoAtIndex:index];
         if ([photo respondsToSelector:@selector(caption)]) {
-            if ([photo caption]) captionView = [[MWCaptionView alloc] initWithPhoto:photo whiteBackground:_useWhiteBackgroundColor];
+            if ([photo caption]) captionView = [[MWCaptionView alloc] initWithPhoto:photo whiteBackground:_useWhiteBackgroundColor font: self.customFont];
         }
     }
     captionView.alpha = [self areControlsHidden] ? 0 : 1; // Initial alpha
