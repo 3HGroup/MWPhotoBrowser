@@ -1709,11 +1709,11 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
         }
         // Dismiss view controller
         if ([_delegate respondsToSelector:@selector(photoBrowserDidFinishModalPresentation:)]) {
-            // Call delegate method and let them dismiss us
+            // Call delegate method and dismiss here
             [_delegate photoBrowserDidFinishModalPresentation:self];
-        } else  {
-            [self dismissViewControllerAnimated:YES completion:nil];
         }
+        
+        [self dismissViewControllerAnimated:YES completion:nil];
     }
 }
 
