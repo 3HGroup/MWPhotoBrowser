@@ -1712,8 +1712,9 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
             // Call delegate method and dismiss here
             [_delegate photoBrowserDidFinishModalPresentation:self];
         }
-        
-        [self dismissViewControllerAnimated:YES completion:nil];
+        else {   
+            [self dismissViewControllerAnimated:YES completion:nil];
+        }
     }
 }
 
