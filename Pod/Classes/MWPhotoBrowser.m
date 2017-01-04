@@ -395,7 +395,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     [self setNavBarAppearance:animated];
     
     // Update UI
-	[self hideControlsAfterDelay];
+//	[self hideControlsAfterDelay];
     
     // Initial appearance
     if (!_viewHasAppearedInitially) {
@@ -625,7 +625,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 	_currentPageIndex = _pageIndexBeforeRotation;
 	
 	// Delay control holding
-	[self hideControlsAfterDelay];
+//	[self hideControlsAfterDelay];
     
     // Layout
     [self layoutVisiblePages];
@@ -1151,7 +1151,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
 	// Hide controls when dragging begins
-	[self setControlsHidden:YES animated:YES permanent:NO];
+//	[self setControlsHidden:YES animated:YES permanent:NO];
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView {
@@ -1671,7 +1671,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
 - (BOOL)areControlsHidden { return (_toolbar.alpha == 0); }
 - (void)hideControls { [self setControlsHidden:YES animated:YES permanent:NO]; }
 - (void)showControls { [self setControlsHidden:NO animated:YES permanent:NO]; }
-- (void)toggleControls { [self setControlsHidden:![self areControlsHidden] animated:YES permanent:NO]; }
+- (void)toggleControls { [self setControlsHidden:![self areControlsHidden] animated:YES permanent:YES]; }
 
 #pragma mark - Properties
 
