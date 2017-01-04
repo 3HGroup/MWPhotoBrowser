@@ -29,6 +29,9 @@
 
 - (id <MWPhoto>)photoBrowser:(MWPhotoBrowser *)photoBrowser thumbPhotoAtIndex:(NSUInteger)index;
 - (MWCaptionView *)photoBrowser:(MWPhotoBrowser *)photoBrowser captionViewForPhotoAtIndex:(NSUInteger)index;
+- (NSString*)photoBrowser:(MWPhotoBrowser *)photoBrowser titleForCustomLabel:(NSUInteger)index;
+- (BOOL)photoBrowser:(MWPhotoBrowser *)photoBrowser enabledForActionButton:(NSUInteger)index;
+- (UIView *)photoBrowser: (MWPhotoBrowser*)photoBrowser additionalViewForPhotoAtIndex:(NSUInteger)index;
 - (NSString *)photoBrowser:(MWPhotoBrowser *)photoBrowser titleForPhotoAtIndex:(NSUInteger)index;
 - (void)photoBrowser:(MWPhotoBrowser *)photoBrowser didDisplayPhotoAtIndex:(NSUInteger)index;
 - (void)photoBrowser:(MWPhotoBrowser *)photoBrowser actionButtonPressedForPhotoAtIndex:(NSUInteger)index;
@@ -57,6 +60,12 @@
 // Icon should be located in the app's main bundle
 @property (nonatomic, strong) NSString *customImageSelectedIconName;
 @property (nonatomic, strong) NSString *customImageSelectedSmallIconName;
+
+@property (nonatomic, strong) NSString *customActionButtonImage;
+@property (nonatomic, strong) NSString *customDoneButtonImage;
+@property (nonatomic, strong) UIFont *customFont;
+@property (nonatomic) BOOL displayCustomLabel;
+@property (nonatomic) BOOL useWhiteBackgroundColor;
 
 // Init
 - (id)initWithPhotos:(NSArray *)photosArray;

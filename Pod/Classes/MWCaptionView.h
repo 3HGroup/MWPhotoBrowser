@@ -12,7 +12,7 @@
 @interface MWCaptionView : UIToolbar
 
 // Init
-- (id)initWithPhoto:(id<MWPhoto>)photo;
+- (id)initWithPhoto:(id<MWPhoto>)photo whiteBackground: (BOOL) whiteBack font: (UIFont*) font;
 
 // To create your own custom caption view, subclass this view
 // and override the following two methods (as well as any other
@@ -28,6 +28,6 @@
 // Override -sizeThatFits: and return a CGSize specifying the height of your
 // custom caption view. With width property is ignored and the caption is displayed
 // the full width of the screen
-- (CGSize)sizeThatFits:(CGSize)size;
+- (CGSize)sizeThatFits:(CGSize)size; 
 
 @end

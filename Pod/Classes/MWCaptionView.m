@@ -15,22 +15,30 @@ static const CGFloat labelPadding = 10;
 // Private
 @interface MWCaptionView () {
     id <MWPhoto> _photo;
-    UILabel *_label;    
+    UILabel *_label;
+    BOOL _useWhiteBackgroundColor;
+    UIFont *_font;
 }
 @end
 
 @implementation MWCaptionView
 
-- (id)initWithPhoto:(id<MWPhoto>)photo {
+- (id)initWithPhoto:(id<MWPhoto>)photo whiteBackground: (BOOL) whiteBack font: (UIFont*) font {
     self = [super initWithFrame:CGRectMake(0, 0, 320, 44)]; // Random initial frame
     if (self) {
         self.userInteractionEnabled = NO;
         _photo = photo;
-        self.barStyle = UIBarStyleBlackTranslucent;
-        self.tintColor = nil;
-        self.barTintColor = nil;
-        self.barStyle = UIBarStyleBlackTranslucent;
-        [self setBackgroundImage:nil forToolbarPosition:UIBarPositionAny barMetrics:UIBarMetricsDefault];
+        
+        _useWhiteBackgroundColor = whiteBack;
+        _font = font;
+        
+        if (_useWhiteBackgroundColor == NO) {
+            self.barStyle = UIBarStyleBlackTranslucent;
+            self.tintColor = nil;
+            self.barTintColor = nil;
+            [self setBackgroundImage:nil forToolbarPosition:UIBarPositionAny barMetrics:UIBarMetricsDefault];
+        }
+        
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin;
         [self setupCaption];
     }
@@ -58,8 +66,16 @@ static const CGFloat labelPadding = 10;
     _label.lineBreakMode = NSLineBreakByWordWrapping;
 
     _label.numberOfLines = 0;
-    _label.textColor = [UIColor whiteColor];
-    _label.font = [UIFont systemFontOfSize:17];
+    _label.textColor = _useWhiteBackgroundColor ? [UIColor blackColor] : [UIColor whiteColor];
+    
+    if ( _font ) {
+        _label.font = _font;
+    }
+    else {
+        _label.font = [UIFont systemFontOfSize:17];
+    }
+    
+    
     if ([_photo respondsToSelector:@selector(caption)]) {
         _label.text = [_photo caption] ? [_photo caption] : @" ";
     }
