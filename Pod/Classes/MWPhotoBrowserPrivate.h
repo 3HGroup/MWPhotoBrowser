@@ -35,6 +35,7 @@
 	UIToolbar *_toolbar;
 	NSTimer *_controlVisibilityTimer;
 	UIBarButtonItem *_previousButton, *_nextButton, *_actionButton, *_doneButton, *_customLabelButton;
+    UILabel *_customLabel;
     MBProgressHUD *_progressHUD;
     
     // Grid

@@ -174,11 +174,22 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     
     // Toolbar Items
     if (self.displayCustomLabel) {
-        _customLabelButton = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
-        
-        // inherit navigation bar's font style
-        if( self.customFont ) {
-            [_customLabelButton setTitleTextAttributes:@{NSFontAttributeName: self.customFont} forState:UIControlStateNormal];
+        if ([[NSProcessInfo processInfo] operatingSystemVersion].majorVersion >= 11) {
+            _customLabel = [[UILabel alloc] initWithFrame: CGRectZero];
+            
+            // inherit navigation bar's font style
+            if( self.customFont ) {
+                _customLabel.font = self.customFont;
+            }
+            
+            _customLabelButton = [[UIBarButtonItem alloc] initWithCustomView:_customLabel];
+        } else {
+            _customLabelButton = [[UIBarButtonItem alloc] initWithTitle:@"" style:UIBarButtonItemStylePlain target:nil action:nil];
+            
+            // inherit navigation bar's font style
+            if( self.customFont ) {
+                [_customLabelButton setTitleTextAttributes:@{NSFontAttributeName: self.customFont} forState:UIControlStateNormal];
+            }
         }
     }
     if (self.displayNavArrows) {
@@ -344,6 +355,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     _previousButton = nil;
     _nextButton = nil;
     _customLabelButton = nil;
+    _customLabel = nil;
     _progressHUD = nil;
     [super viewDidUnload];
 }
@@ -1198,7 +1210,7 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
     
     // Disable action button if there is no image or it's a video
     MWPhoto *photo = [self photoAtIndex:_currentPageIndex];
-    if ([photo underlyingImage] == nil || ([photo respondsToSelector:@selector(isVideo)] && photo.isVideo) || ([_delegate respondsToSelector:@selector(photoBrowser:enabledForActionButton:)] && [_delegate photoBrowser:self enabledForActionButton:_currentPageIndex] == NO )) {
+    if ([photo underlyingImage] == nil || ([photo respondsToSelector:@selector(isVideo)] && photo.isVideo)) {
         _actionButton.enabled = NO;
         _actionButton.tintColor = [UIColor clearColor]; // Tint to hide button
     } else {
@@ -1206,9 +1218,24 @@ static void * MWVideoPlayerObservation = &MWVideoPlayerObservation;
         _actionButton.tintColor = nil;
     }
 	
+    // update the like action
+    if ([_delegate respondsToSelector:@selector(photoBrowser:enabledForActionButton:)] && [_delegate photoBrowser:self enabledForActionButton:_currentPageIndex] == YES) {
+        _actionButton.enabled = YES;
+    } else {
+        _actionButton.enabled = NO;
+    }
+    
     // Update Custom Label
     if( _customLabelButton && [_delegate respondsToSelector:@selector(photoBrowser:titleForCustomLabel:)] ) {
-        _customLabelButton.title = [_delegate photoBrowser:self titleForCustomLabel:_currentPageIndex];
+        
+        if ([[NSProcessInfo processInfo] operatingSystemVersion].majorVersion >= 11) {
+            _customLabel.text = [_delegate photoBrowser:self titleForCustomLabel:_currentPageIndex];
+            CGSize size = [_customLabel.text sizeWithFont:_customLabel.font];;
+            _customLabel.frame = CGRectMake(0, 0, size.width, size.height);
+        } else {
+            _customLabelButton.title = [_delegate photoBrowser:self titleForCustomLabel:_currentPageIndex];
+        }
+        
     }
 }
 
