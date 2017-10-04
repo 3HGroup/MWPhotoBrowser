@@ -33,10 +33,13 @@ static const CGFloat labelPadding = 10;
         _font = font;
         
         if (_useWhiteBackgroundColor == NO) {
+/*
             self.barStyle = UIBarStyleBlackTranslucent;
             self.tintColor = nil;
             self.barTintColor = nil;
             [self setBackgroundImage:nil forToolbarPosition:UIBarPositionAny barMetrics:UIBarMetricsDefault];
+ */
+            self.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.6];
         }
         
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin;

@@ -9,7 +9,8 @@
 #import <UIKit/UIKit.h>
 #import "MWPhotoProtocol.h"
 
-@interface MWCaptionView : UIToolbar
+//@interface MWCaptionView : UIToolbar
+@interface MWCaptionView : UIView
 
 // Init
 - (id)initWithPhoto:(id<MWPhoto>)photo whiteBackground: (BOOL) whiteBack font: (UIFont*) font;
