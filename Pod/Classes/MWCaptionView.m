@@ -41,7 +41,7 @@ static const CGFloat labelPadding = 10;
  */
             self.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.6];
         } else {
-            self.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.8;
+            self.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.8];
         }
         
         self.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleTopMargin|UIViewAutoresizingFlexibleLeftMargin|UIViewAutoresizingFlexibleRightMargin;
